@@ -4,6 +4,7 @@ package md.design.patterns.templatemethod;
 import java.sql.*;
 
 public abstract class BaseModel {
+
 	protected String SQL;
 
 	protected Connection getConnection() {
@@ -20,7 +21,7 @@ public abstract class BaseModel {
 	protected abstract void insertOperation(PreparedStatement preparedStatement) throws SQLException;
 
 	public void insert() {
-		Connection connection = null;
+		Connection connection;
 		connection = getConnection();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -30,27 +31,30 @@ public abstract class BaseModel {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					System.out.println(e.getMessage());
-				}
-
-			}
-
+			closeConnection(connection);
 		}
 	}
-	protected long getId(PreparedStatement preparedStatement){
-			long id=0;
-			try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
-				if (rs.next()) {
-					id = rs.getLong(1);
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getMessage());
+
+	private void closeConnection(Connection connection) {
+		if (connection != null) {
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
 			}
-			return id;
+		}
+	}
+
+	protected long getId(PreparedStatement preparedStatement) {
+		long id = 0;
+		try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
+			if (rs.next()) {
+				id = rs.getLong(1);
+			}
+		} catch (SQLException ex) {
+			System.out.println(ex.getMessage());
+		}
+		return id;
 
 	}
 }
